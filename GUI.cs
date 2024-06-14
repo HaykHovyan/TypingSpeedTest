@@ -63,8 +63,7 @@ namespace TypeSpeedTest
             Console.Clear();
             await InputOutput.Write("Well Done!");
             await Task.Delay(1000);
-            await InputOutput.Write("Here are your stats", 0, Console.CursorTop + 1);
-            await Task.Delay(200);
+            await InputOutput.Write("Here are your stats\n", 0, Console.CursorTop + 1);
             await InputOutput.Write("Gross WPM: " + grossWPM, 0, Console.CursorTop + 1);
             await InputOutput.Write("Mistakes: " + mistakes, 0, Console.CursorTop + 1);
             if (netWPM >= 0)

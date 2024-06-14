@@ -37,7 +37,7 @@ namespace TypeSpeedTest
 
         public Game()
         {
-            duration = 60_000_000; //milliseconds
+            duration = 60_000; //milliseconds
             timer = new System.Timers.Timer(duration);
             text = Texts.GetText();
             letters = text.ToCharArray();
@@ -119,17 +119,15 @@ namespace TypeSpeedTest
 
         async Task End()
         {
+            timer.Stop();
+            await CalculateWPM();
+            await GUI.DisplayResults(Result.grossWPM, Result.netWPM, Result.mistakes);
+            var restart = await GUI.PromptRestart();
+            if (restart == true)
             {
-                timer.Stop();
-                await CalculateWPM();
-                await GUI.DisplayResults(Result.grossWPM, Result.netWPM, Result.mistakes);
-                var restart = await GUI.PromptRestart();
-                if (restart == true)
-                {
-                    Program.Main();
-                    this.Dispose();
-                }
-            };
+                Dispose();
+                await Program.Main();
+            }
         }
 
         void GenerateText(string text)
