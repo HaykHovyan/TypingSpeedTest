@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using static System.Net.Mime.MediaTypeNames;
 using static TypeSpeedTest.Game;
@@ -36,7 +37,7 @@ namespace TypeSpeedTest
 
         public Game()
         {
-            duration = 60_000; //milliseconds
+            duration = 60_000_000; //milliseconds
             timer = new System.Timers.Timer(duration);
             text = Texts.GetText();
             letters = text.ToCharArray();
@@ -133,7 +134,14 @@ namespace TypeSpeedTest
 
         void GenerateText(string text)
         {
-            Console.WriteLine(text);
+            for (int i = 0; i < text.Length; i++)
+            {
+                if (Console.CursorLeft == Console.WindowWidth - 1)
+                {
+                    Console.WriteLine();
+                }
+                Console.Write(text[i]);
+            }
             Console.SetCursorPosition(0, 0);
         }
 

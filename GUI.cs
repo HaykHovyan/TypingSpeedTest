@@ -12,8 +12,6 @@ namespace TypeSpeedTest
         public static void Initialize()
         {
             Console.Title = "Typing Speed Test";
-            Console.BufferHeight = Console.WindowHeight;
-            Console.BufferWidth = Console.WindowWidth;
             Console.BackgroundColor = ConsoleColor.White;
             Console.ForegroundColor = ConsoleColor.Black;
             Console.Clear();
@@ -84,41 +82,59 @@ namespace TypeSpeedTest
         public static async Task<bool> PromptRestart()
         {
             await InputOutput.Write("Press Space to go again...", 0, Console.CursorTop + 1);
-            if (Console.KeyAvailable && Console.ReadKey(true).Key == ConsoleKey.Spacebar)
+            //if (Console.KeyAvailable && Console.ReadKey(true).Key == ConsoleKey.Spacebar)
+            //{
+            //    return true;
+            //}
+            while (!Console.KeyAvailable)
+            {
+                await Task.Delay(10);
+            }
+            if (Console.ReadKey(true).Key == ConsoleKey.Spacebar)
             {
                 return true;
             }
-
-            return false;
+            else
+            {
+                return false;
+            }
         }
 
         public static void MarkCorrect(char letter)
         {
             Console.BackgroundColor = ConsoleColor.Green;
             Console.Write(letter);
+            if (Console.CursorLeft == Console.WindowWidth - 1)
+                Console.WriteLine();
         }
 
         public static void MarkIncorrect(char letter)
         {
             Console.BackgroundColor = ConsoleColor.Red;
             Console.Write(letter);
+            if (Console.CursorLeft == Console.WindowWidth - 1)
+                Console.WriteLine();
         }
 
         public static void BackSpace(char letter)
-       {
-            if (Console.CursorLeft == 0 && Console.CursorTop != 0)
+        {
+            if (Console.CursorLeft == 0 && Console.CursorTop == 0)
+            {
+                return;
+            }
+            else if (Console.CursorLeft == 0)
             {
                 Console.CursorTop--;
-                Console.CursorLeft = Console.WindowWidth - 1;
-                Console.Write(letter);
+                Console.CursorLeft = Console.WindowWidth - 2;
+
             }
             else
             {
                 Console.CursorLeft--;
-                Console.BackgroundColor = ConsoleColor.White;
-                Console.Write(letter);
-                Console.CursorLeft--;
             }
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.Write(letter);
+            Console.CursorLeft--;
         }
 
         public static async Task DisplayError(Exception error)
