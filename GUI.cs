@@ -56,7 +56,7 @@ namespace TypeSpeedTest
             ShowCursor();
         }
 
-        public static async Task DisplayResults(int grossWPM, int netWPM, int mistakes)
+        public static async Task DisplayResults(double grossWPM, double netWPM, int mistakes)
         {
             Console.ForegroundColor = ConsoleColor.Black;
             Console.BackgroundColor = ConsoleColor.White;
