@@ -25,9 +25,9 @@ namespace TypeSpeedTest
         struct Result
         {
             public static int charactersTyped;
-            public static int grossWPM;
             public static int mistakes;
-            public static int netWPM;
+            public static double grossWPM;
+            public static double netWPM;
         }
 
         public void Dispose()
@@ -163,10 +163,16 @@ namespace TypeSpeedTest
         {
             const int wordLength = 5;
             int textLength = text.Length;
-            int durationMinutes = Math.Clamp(duration / 60_000, 1, 2);
-            Result.grossWPM = (Result.charactersTyped / wordLength) / durationMinutes;
-            Result.mistakes = mistakes.Count();
-            Result.netWPM = Result.grossWPM - (Result.mistakes / durationMinutes);
+            int durationInMinutes = Math.Clamp(duration / 60_000, 1, 2);
+            int charactersTyped = Result.charactersTyped;
+            int mistakeCount = mistakes.Count();
+
+            double grossWPM = (charactersTyped / wordLength) / durationInMinutes;
+            double netWPM = grossWPM - (mistakeCount / durationInMinutes);
+
+            Result.mistakes = mistakeCount;
+            Result.grossWPM = Math.Round(grossWPM);
+            Result.netWPM = Math.Round(netWPM);
             return Task.CompletedTask;
         }
     }
