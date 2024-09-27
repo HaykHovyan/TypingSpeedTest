@@ -1,4 +1,11 @@
-﻿namespace TypingSpeedTest
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace TypeSpeedTest
 {
     public static class Texts
     {
@@ -53,10 +60,6 @@
             };
         }
 
-        /// <summary>
-        /// Gets one of the predefined texts randomly
-        /// </summary>
-        /// <returns></returns>
         public static string GetText()
         {
             var random = new Random();

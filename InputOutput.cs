@@ -1,13 +1,20 @@
-﻿namespace TypingSpeedTest
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Xml;
+
+namespace TypeSpeedTest
 {
     public static class InputOutput
     {
-        public static async Task WritePretty(string output, int? cursorPositionX = null, int? cursorPositionY = null)
+        public async static Task Write(string output, int cursorPositionX = 0, int cursorPositionY = 0)
         {
 
             int outputLength = output.Length;
             //set cursor position in the middle
-            if (cursorPositionX == null)
+            if (cursorPositionX == 0)
             {
                 if (outputLength < Console.BufferWidth)
                 {
@@ -15,10 +22,10 @@
                 }
                 else
                 {
-                    cursorPositionX = 0;
+                    cursorPositionX = 1;
                 }
             }
-            if (cursorPositionY == null)
+            if (cursorPositionY == 0)
             {
                 cursorPositionY = (Console.WindowHeight / 2);
             }
@@ -30,20 +37,20 @@
                 {
                     string lastString = outputDivided.Last();
                     cursorPositionX = (Console.BufferWidth - lastString.Length) / 2;
-                    await WritePretty(lastString, cursorPositionX, cursorPositionY++);
+                    await Write(lastString, cursorPositionX, cursorPositionY++);
                     outputDivided.RemoveAt(outputDivided.Count - 1);
                 }
             }
             else
             {
-                Console.SetCursorPosition((int)cursorPositionX, (int)cursorPositionY);
+                Console.SetCursorPosition(cursorPositionX, cursorPositionY);
 
                 for (int i = 0; i < output.Length; i++)
                 {
                     if (Console.CursorLeft == Console.WindowWidth - 1)
                     {
                         cursorPositionY++;
-                        Console.SetCursorPosition((int)cursorPositionX, (int)cursorPositionY);
+                        Console.SetCursorPosition(cursorPositionX, cursorPositionY);
                     }
 
                     Console.Write(output[i]);

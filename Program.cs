@@ -1,18 +1,28 @@
-﻿namespace TypingSpeedTest
+﻿using System;
+using System.Timers;
+using System.Xml.XPath;
+
+namespace TypeSpeedTest
 {
     class Program
     {
-        /// <summary>
-        /// Entry point for the program
-        /// </summary>
         public static async Task Main()
         {
-            GUI.Initialize();
-            Game game = new Game();
-            await game.Start();
-            while (true)
+            using (var game = new Game())
             {
-                await game.Update();
+                GUI.Initialize();
+
+                await Task.Run(async () =>
+                {
+                    await game.Start();
+                    while (true)
+                    {
+                        await game.Update();
+                    }
+                });
+
+                var ts = new TimeSpan(1, 0, 0, 0);
+                Thread.Sleep(ts);
             }
         }
     }
