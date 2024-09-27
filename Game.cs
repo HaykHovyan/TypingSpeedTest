@@ -1,100 +1,144 @@
-﻿namespace TypingSpeedTest
-{
-    public class Game
-    {
-        private int duration;
-        private int durationSeconds;
-        private string text;
-        private int index;
-        private System.Timers.Timer timer;
-        private System.Timers.Timer timeRemaining;
-        private Result result;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.Design;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Metadata;
+using System.Reflection.Metadata.Ecma335;
+using System.Text;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
+using static TypeSpeedTest.Game;
 
-        /// <summary>
-        /// Standard ctor for variable initialization
-        /// </summary>
+namespace TypeSpeedTest
+{
+    public class Game : IDisposable
+    {
+        int duration;
+        string text;
+        char[] letters;
+        int index;
+        System.Timers.Timer timer;
+        List<char> mistakes;
+
+        struct Result
+        {
+            public static int charactersTyped;
+            public static int mistakes;
+            public static double grossWPM;
+            public static double netWPM;
+        }
+
+        public void Dispose()
+        {
+
+        }
+
         public Game()
         {
-            duration = 60_000;
-            durationSeconds = duration / 1000;
-            text = Texts.GetText();
-            index = 0;
+            duration = 60_000; //milliseconds
             timer = new System.Timers.Timer(duration);
-            timeRemaining = new System.Timers.Timer(1000);
-            result = new Result();
+            text = Texts.GetText();
+            letters = text.ToCharArray();
+            index = 0;
+            mistakes = new List<char>();
+            Result.grossWPM = 0;
+            Result.mistakes = 0;
+            Result.netWPM = 0;
         }
 
-        /// <summary>
-        /// Called once at the start of the game
-        /// </summary>
         public async Task Start()
         {
+            await GUI.StartGame();
             await GUI.DisplayCountdown();
+<<<<<<< HEAD
             GUI.StartGame();
+=======
+>>>>>>> 5be3fdb40cfda6fc0dd61d0f69c392d1232e692a
             GenerateText(text);
+
             timer.Elapsed += async (s, e) => await End();
             timer.Start();
-            timeRemaining.Elapsed += async (s, e) =>
-            {
-                durationSeconds--;
-                await GUI.DisplayRemainingTime(durationSeconds);
-            };
-            timeRemaining.Start();
         }
 
-        /// <summary>
-        /// Called every second until the process is terminated
-        /// </summary>
-        /// <returns>
-        /// A boolean indicating whether the game is finished
-        /// </returns>
         public async Task Update()
         {
-            if (timer.Enabled == false)
+            if (timer.Enabled == true && index != letters.Length - 1)
             {
-                return;
-            }
-            else if (index == text.Length - 1)
-            {
-                await End();
-                return;
-            }
+                try
+                {
+                    char inputChar = InputOutput.Read();
+                    if (inputChar != '\0')
+                    {
+                        var checkResult = CheckInput(inputChar, letters[index]);
+                        switch (checkResult)
+                        {
+                            //correct
+                            case 1:
+                                GUI.MarkCorrect(letters[index]);
+                                index++;
+                                Result.charactersTyped++;
+                                break;
+                            //incorrect
+                            case -1:
+                                GUI.MarkIncorrect(letters[index]);
+                                mistakes.Add(letters[index]);
+                                index++;
+                                Result.charactersTyped++;
+                                break;
+                            //backspace
+                            case 0:
+                                if (index == 0)
+                                {
+                                    break;
+                                }
+                                Result.charactersTyped--;
+                                index--;
+                                GUI.BackSpace(letters[index]);
+                                if (mistakes.Count() != 0 && mistakes.Contains(letters[index]))
+                                {
+                                    mistakes.RemoveAt(mistakes.LastIndexOf(letters[index]));
+                                }
+                                break;
+                            default:
+                                break;
+                        };
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await GUI.DisplayError(ex);
+                    Console.ReadLine();
+                    Environment.Exit(0);
+                }
 
-            char inputChar = InputOutput.Read();
-            CheckInput(inputChar, text[index]);
+            }
+            if (index == letters.Length - 1)
+            {
+                timer.Stop();
+                await End();
+            }
         }
 
-        /// <summary>
-        /// Called either when the game timer counts down to 0 or when the end of the text is reached
-        /// </summary>
-        private async Task End()
+        async Task End()
         {
             timer.Stop();
-            timeRemaining.Stop();
             await CalculateWPM();
-            await GUI.DisplayResults(result.GrossWPM, result.NetWPM, result.Mistakes.Count());
-            bool restart = await GUI.PromptRestart();
-            if (restart)
+            await GUI.DisplayResults(Result.grossWPM, Result.netWPM, Result.mistakes);
+            var restart = await GUI.PromptRestart();
+            if (restart == true)
             {
-                Program.Main();
-            }
-            else
-            {
-                Environment.Exit(0);
+                Dispose();
+                await Program.Main();
             }
         }
 
-        /// <summary>
-        /// Generates the text to be typed
-        /// </summary>
-        /// <param name="text">
-        /// The text to be typed, passed in as a single string variable
-        /// </param>
-        private void GenerateText(string text)
+        void GenerateText(string text)
         {
             for (int i = 0; i < text.Length; i++)
             {
-                if (Console.CursorLeft == Console.WindowWidth - 15)
+                if (Console.CursorLeft == Console.WindowWidth - 1)
                 {
                     Console.WriteLine();
                 }
@@ -103,79 +147,36 @@
             Console.SetCursorPosition(0, 0);
         }
 
-        /// <summary>
-        /// Checks player input against the letter at the current index in the text
-        /// </summary>
-        private void CheckInput(char input, char currentLetter)
+        public static int CheckInput(char input, char letter)
         {
-            if (input == currentLetter)
+            if (input == letter)
             {
-                MarkCorrect();
+                return 1;
             }
             else if (input == '\b')
             {
-                MarkBackSpace();
-            }
-            else if (input == '\0')
-            {
-                return;
+                return 0;
             }
             else
             {
-                MarkIncorrect();
+                return -1;
             }
         }
 
-        /// <summary>
-        /// Called when the player inputs the correct letter
-        /// </summary>
-        private void MarkCorrect()
-        {
-            GUI.MarkCorrect(text[index]);
-            index++;
-            result.CharactersTyped++;
-        }
-
-        /// <summary>
-        /// Called when the player inputs an incorrect letter
-        /// </summary>
-        private void MarkIncorrect()
-        {
-
-            GUI.MarkIncorrect(text[index]);
-            index++;
-            result.CharactersTyped++;
-            result.Mistakes.Add(text[index]);
-        }
-
-        /// <summary>
-        /// Called when the player presses backspace
-        /// </summary>
-        private void MarkBackSpace()
-        {
-            if (index == 0)
-            {
-                return;
-            }
-            result.CharactersTyped--;
-            index--;
-            GUI.BackSpace(text[index]);
-            if (result.Mistakes.Count() != 0 && result.Mistakes.Contains(text[index]))
-            {
-                result.Mistakes.RemoveAt(result.Mistakes.LastIndexOf(text[index]));
-            }
-        }
-
-        /// <summary>
-        /// Called at the end of the game to calculate player statistics
-        /// </summary>
-        private Task CalculateWPM()
+        Task CalculateWPM()
         {
             const int wordLength = 5;
             int textLength = text.Length;
-            int durationMinutes = Math.Clamp(duration / 60_000, 1, 2);
-            result.GrossWPM = (result.CharactersTyped / wordLength) / durationMinutes;
-            result.NetWPM = result.GrossWPM - (result.Mistakes.Count() / durationMinutes);
+            int durationInMinutes = Math.Clamp(duration / 60_000, 1, 2);
+            int charactersTyped = Result.charactersTyped;
+            int mistakeCount = mistakes.Count();
+
+            double grossWPM = (charactersTyped / wordLength) / durationInMinutes;
+            double netWPM = grossWPM - (mistakeCount / durationInMinutes);
+
+            Result.mistakes = mistakeCount;
+            Result.grossWPM = Math.Round(grossWPM);
+            Result.netWPM = Math.Round(netWPM);
             return Task.CompletedTask;
         }
     }

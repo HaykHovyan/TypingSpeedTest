@@ -1,27 +1,23 @@
-﻿namespace TypingSpeedTest
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace TypeSpeedTest
 {
     public static class GUI
     {
-        private static readonly ConsoleColor defaultBackground = ConsoleColor.White;
-        private static readonly ConsoleColor defaultForeground = ConsoleColor.Black;
-        private static readonly object syncLock = new object();
-
-        /// <summary>
-        /// Sets the window title, icon, and background and foreground colors
-        /// </summary>
         public static void Initialize()
         {
             Console.Title = "Typing Speed Test";
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-            {
-                System.Drawing.Icon icon = new System.Drawing.Icon("icon.ico");
-                SetWindowIcon(icon);
-            }
-            Console.BackgroundColor = defaultBackground;
-            Console.ForegroundColor = defaultForeground;
-            ClearConsole();
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Black;
+            Console.Clear();
         }
 
+<<<<<<< HEAD
         /// <summary>
         /// Sets the text screen border as well as additional text in the secondary window
         /// </summary>
@@ -40,8 +36,12 @@
         }
 
         public static void ClearConsole()
+=======
+        public static Task Clear()
+>>>>>>> 5be3fdb40cfda6fc0dd61d0f69c392d1232e692a
         {
             Console.Clear();
+            return Task.CompletedTask;
         }
 
         public static void HideCursor()
@@ -54,145 +54,58 @@
             Console.CursorVisible = true;
         }
 
-        /// <summary>
-        /// Displays the initial countdown before the game starts
-        /// </summary>
+        public static async Task StartGame()
+        {
+            await InputOutput.Write("Get Ready!");
+            await Task.Delay(1000);
+            Console.Clear();
+        }
+
         public async static Task DisplayCountdown()
         {
-            await InputOutput.WritePretty("Get Ready!");
-            await Task.Delay(2000);
-            ClearConsole();
             HideCursor();
             int countDown = 3;
-            for (int i = countDown; i > 0; i--)
+            for (int i = 0; i < countDown; i++)
             {
-                Console.SetCursorPosition(Console.WindowWidth / 2, Console.WindowHeight / 2);
-                Console.Write(i);
+                await InputOutput.Write((countDown - i).ToString());
                 Console.Beep();
+                Console.CursorLeft = Console.WindowWidth / 2;
+                //Thread.Sleep(1000);
                 await Task.Delay(1000);
             }
-            ClearConsole();
+            Console.Clear();
             ShowCursor();
         }
 
-        /// <summary>
-        /// Displays the time remaining
-        /// </summary>
-        /// <param name="timeRemaining"></param>
-        public static Task DisplayRemainingTime(int timeRemaining)
+        public static async Task DisplayResults(double grossWPM, double netWPM, int mistakes)
         {
-            lock (syncLock)
-            {
-                var previousPosition = Console.GetCursorPosition();
-                Console.BackgroundColor = defaultBackground;
-                Console.SetCursorPosition(Console.WindowWidth - 7, 1);
-                Console.Write(timeRemaining);
-                if (timeRemaining == 9)
-                {
-                    Console.Write(" ");
-                }
-                Console.SetCursorPosition(previousPosition.Left, previousPosition.Top);
-            }
-            Thread.Sleep(100);
-            return Task.CompletedTask;
-        }
-
-        /// <summary>
-        /// Called if the user inputs the correct letter
-        /// </summary>
-        /// <param name="letter"></param>
-        public static void MarkCorrect(char letter)
-        {
-            lock (syncLock)
-            {
-                Console.BackgroundColor = ConsoleColor.Green;
-                Console.Write(letter);
-                if (Console.CursorLeft == Console.WindowWidth - 15)
-                {
-                    Console.WriteLine();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Called if the user inputs an incorrect letter
-        /// </summary>
-        /// <param name="letter"></param>
-        public static void MarkIncorrect(char letter)
-        {
-            lock (syncLock)
-            {
-                Console.BackgroundColor = ConsoleColor.Red;
-                Console.Write(letter);
-                if (Console.CursorLeft == Console.WindowWidth - 15)
-                {
-                    Console.WriteLine();
-                }
-            }
-        }
-
-        /// <summary>
-        /// called if the user presses backspace
-        /// </summary>
-        /// <param name="letter"></param>
-        public static void BackSpace(char letter)
-        {
-            lock (syncLock)
-            {
-                if (Console.CursorLeft == 0 && Console.CursorTop == 0)
-                {
-                    return;
-                }
-                else if (Console.CursorLeft == 0)
-                {
-                    Console.CursorTop--;
-                    Console.CursorLeft = Console.WindowWidth - 16;
-                }
-                else
-                {
-                    Console.CursorLeft--;
-                }
-                Console.BackgroundColor = defaultBackground;
-                Console.Write(letter);
-                Console.CursorLeft--;
-            }
-        }
-
-        /// <summary>
-        /// Displays the final results
-        /// </summary>
-        /// <param name="grossWPM"></param>
-        /// <param name="netWPM"></param>
-        /// <param name="mistakes"></param>
-        /// <returns></returns>
-        public static async Task DisplayResults(int grossWPM, int netWPM, int mistakes)
-        {
-            Console.ForegroundColor = defaultForeground;
-            Console.BackgroundColor = defaultBackground;
-            ClearConsole();
-            await InputOutput.WritePretty("Well Done!");
+            Console.ForegroundColor = ConsoleColor.Black;
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.Clear();
+            await InputOutput.Write("Well Done!");
             await Task.Delay(1000);
-            await InputOutput.WritePretty("\nHere are your stats\n" +
-                                          "Gross WPM: " + grossWPM + "\n" +
-                                          "Mistakes: " + mistakes, null, Console.CursorTop + 1);
+            await InputOutput.Write("Here are your stats\n", 0, Console.CursorTop + 1);
+            await InputOutput.Write("Gross WPM: " + grossWPM, 0, Console.CursorTop + 1);
+            await InputOutput.Write("Mistakes: " + mistakes, 0, Console.CursorTop + 1);
             if (netWPM >= 0)
             {
-                await InputOutput.WritePretty("Net WPM: " + netWPM, null, Console.CursorTop + 1);
+                await InputOutput.Write("Net WPM: " + netWPM, 0, Console.CursorTop + 1);
             }
             else
             {
-                await InputOutput.WritePretty("Net WPM: Less than 0 \n (Wow, how did you manage that?)", null, Console.CursorTop + 1);
+                await InputOutput.Write("Net WPM: Less than 0", 0, Console.CursorTop + 1);
             }
             await Task.Delay(1000);
+            await InputOutput.Write($"\n\n\n", 0, Console.CursorTop + 1);
         }
 
-        /// <summary>
-        /// Prompts the player for restart
-        /// </summary>
-        /// <returns>returns true if the player pressed the restart button</returns>
         public static async Task<bool> PromptRestart()
         {
-            await InputOutput.WritePretty("\n\n\nPress Space to go again...", null, Console.CursorTop + 1);
+            await InputOutput.Write("Press Space to go again...", 0, Console.CursorTop + 1);
+            //if (Console.KeyAvailable && Console.ReadKey(true).Key == ConsoleKey.Spacebar)
+            //{
+            //    return true;
+            //}
             while (!Console.KeyAvailable)
             {
                 await Task.Delay(10);
@@ -207,26 +120,50 @@
             }
         }
 
-        public enum WinMessages : uint
+        public static void MarkCorrect(char letter)
         {
-            /// <summary>
-            /// An application sends the WM_SETICON message to associate a new large or small icon with a window. 
-            /// The system displays the large icon in the ALT+TAB dialog box, and the small icon in the window caption. 
-            /// </summary>
-            SETICON = 0x0080,
+            Console.BackgroundColor = ConsoleColor.Green;
+            Console.Write(letter);
+            if (Console.CursorLeft == Console.WindowWidth - 1)
+                Console.WriteLine();
         }
-        [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Auto)]
-        private static extern IntPtr SendMessage(IntPtr hWnd, int Msg, int wParam, IntPtr lParam);
 
-
-        /// <summary>
-        /// Sets the application window icon
-        /// </summary>
-        private static void SetWindowIcon(System.Drawing.Icon icon)
+        public static void MarkIncorrect(char letter)
         {
-            IntPtr mwHandle = System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
-            IntPtr result01 = SendMessage(mwHandle, (int)WinMessages.SETICON, 0, icon.Handle);
-            IntPtr result02 = SendMessage(mwHandle, (int)WinMessages.SETICON, 1, icon.Handle);
+            Console.BackgroundColor = ConsoleColor.Red;
+            Console.Write(letter);
+            if (Console.CursorLeft == Console.WindowWidth - 1)
+                Console.WriteLine();
+        }
+
+        public static void BackSpace(char letter)
+        {
+            if (Console.CursorLeft == 0 && Console.CursorTop == 0)
+            {
+                return;
+            }
+            else if (Console.CursorLeft == 0)
+            {
+                Console.CursorTop--;
+                Console.CursorLeft = Console.WindowWidth - 2;
+
+            }
+            else
+            {
+                Console.CursorLeft--;
+            }
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.Write(letter);
+            Console.CursorLeft--;
+        }
+
+        public static async Task DisplayError(Exception error)
+        {
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Black;
+            Console.Clear();
+
+            await InputOutput.Write("The Program Encountered and Error!\n\n\n" + error.Message);
         }
     }
 }
