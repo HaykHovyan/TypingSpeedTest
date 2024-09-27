@@ -30,7 +30,7 @@
         public async Task Start()
         {
             await GUI.DisplayCountdown();
-            GUI.Setup();
+            GUI.StartGame();
             GenerateText(text);
             timer.Elapsed += async (s, e) => await End();
             timer.Start();

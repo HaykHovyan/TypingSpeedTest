@@ -25,7 +25,7 @@
         /// <summary>
         /// Sets the text screen border as well as additional text in the secondary window
         /// </summary>
-        public static void Setup()
+        public static void StartGame()
         {
             for (int i = 0; i < Console.WindowHeight; i++)
             {
@@ -34,6 +34,8 @@
             }
             Console.SetCursorPosition(Console.WindowWidth - 8, 0);
             Console.Write("Time");
+            Console.SetCursorPosition(Console.WindowWidth - 7, 1);
+            Console.Write(60);
             Console.SetCursorPosition(0, 0);
         }
 

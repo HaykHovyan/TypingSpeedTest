@@ -2,13 +2,10 @@
 {
     public static class Texts
     {
-        //private string text;
-        //public string Text { get { return text; } }
-
         static readonly string text1 = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " +
             "Nullam vehicula laoreet turpis vitae placerat. " +
             "Quisque suscipit efficitur ante, a porta sapien vestibulum sed. " +
-            "Suspendisse vel rhoncus sem, non volutpat enim. " + 
+            "Suspendisse vel rhoncus sem, non volutpat enim. " +
             "Mauris sollicitudin ligula sed consequat porta. " +
             "Phasellus sagittis dictum magna, sit amet imperdiet felis vulputate ut. " +
             "Vivamus fringilla posuere ante. Suspendisse eget eros euismod, " +
