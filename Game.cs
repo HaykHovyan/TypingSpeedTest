@@ -5,7 +5,7 @@
         private int duration;
         private int durationSeconds;
         private string text;
-        private int index;
+        private int currentIndex;
         private System.Timers.Timer timer;
         private System.Timers.Timer timeRemaining;
         private Result result;
@@ -18,9 +18,15 @@
             duration = 60_000;
             durationSeconds = duration / 1000;
             text = Texts.GetText();
-            index = 0;
+            currentIndex = 0;
             timer = new System.Timers.Timer(duration);
+            timer.Elapsed += async (s, e) => await End();
             timeRemaining = new System.Timers.Timer(1000);
+            timeRemaining.Elapsed += async (s, e) =>
+            {
+                durationSeconds--;
+                await GUI.DisplayRemainingTime(durationSeconds);
+            };
             result = new Result();
         }
 
@@ -30,15 +36,10 @@
         public async Task Start()
         {
             await GUI.DisplayCountdown();
-            GUI.StartGame();
+            GUI.SetupGameScreen();
             GenerateText(text);
-            timer.Elapsed += async (s, e) => await End();
+            
             timer.Start();
-            timeRemaining.Elapsed += async (s, e) =>
-            {
-                durationSeconds--;
-                await GUI.DisplayRemainingTime(durationSeconds);
-            };
             timeRemaining.Start();
         }
 
@@ -54,14 +55,14 @@
             {
                 return;
             }
-            else if (index == text.Length - 1)
+            else if (currentIndex == text.Length - 1)
             {
                 await End();
                 return;
             }
 
             char inputChar = InputOutput.Read();
-            CheckInput(inputChar, text[index]);
+            CheckInput(inputChar, text[currentIndex]);
         }
 
         /// <summary>
@@ -72,7 +73,7 @@
             timer.Stop();
             timeRemaining.Stop();
             await CalculateWPM();
-            await GUI.DisplayResults(result.GrossWPM, result.NetWPM, result.Mistakes.Count());
+            await GUI.DisplayResults(result);
             bool restart = await GUI.PromptRestart();
             if (restart)
             {
@@ -104,7 +105,7 @@
         }
 
         /// <summary>
-        /// Checks player input against the letter at the current index in the text
+        /// Checks player input against the letter at the current currentIndex in the text
         /// </summary>
         private void CheckInput(char input, char currentLetter)
         {
@@ -131,8 +132,8 @@
         /// </summary>
         private void MarkCorrect()
         {
-            GUI.MarkCorrect(text[index]);
-            index++;
+            GUI.MarkCorrect(text[currentIndex]);
+            currentIndex++;
             result.CharactersTyped++;
         }
 
@@ -142,10 +143,10 @@
         private void MarkIncorrect()
         {
 
-            GUI.MarkIncorrect(text[index]);
-            index++;
+            GUI.MarkIncorrect(text[currentIndex]);
+            currentIndex++;
             result.CharactersTyped++;
-            result.Mistakes.Add(text[index]);
+            result.Mistakes.Add(text[currentIndex]);
         }
 
         /// <summary>
@@ -153,16 +154,16 @@
         /// </summary>
         private void MarkBackSpace()
         {
-            if (index == 0)
+            if (currentIndex == 0)
             {
                 return;
             }
             result.CharactersTyped--;
-            index--;
-            GUI.BackSpace(text[index]);
-            if (result.Mistakes.Count() != 0 && result.Mistakes.Contains(text[index]))
+            currentIndex--;
+            GUI.BackSpace(text[currentIndex]);
+            if (result.Mistakes.Count() != 0 && result.Mistakes.Contains(text[currentIndex]))
             {
-                result.Mistakes.RemoveAt(result.Mistakes.LastIndexOf(text[index]));
+                result.Mistakes.RemoveAt(result.Mistakes.LastIndexOf(text[currentIndex]));
             }
         }
 
@@ -173,7 +174,7 @@
         {
             const int wordLength = 5;
             int textLength = text.Length;
-            int durationMinutes = Math.Clamp(duration / 60_000, 1, 2);
+            float durationMinutes = duration / 60_000;
             result.GrossWPM = (result.CharactersTyped / wordLength) / durationMinutes;
             result.NetWPM = result.GrossWPM - (result.Mistakes.Count() / durationMinutes);
             return Task.CompletedTask;

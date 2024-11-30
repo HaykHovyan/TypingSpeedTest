@@ -6,40 +6,7 @@
         private static readonly ConsoleColor defaultForeground = ConsoleColor.Black;
         private static readonly object syncLock = new object();
 
-        /// <summary>
-        /// Sets the window title, icon, and background and foreground colors
-        /// </summary>
-        public static void Initialize()
-        {
-            Console.Title = "Typing Speed Test";
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-            {
-                System.Drawing.Icon icon = new System.Drawing.Icon("icon.ico");
-                SetWindowIcon(icon);
-            }
-            Console.BackgroundColor = defaultBackground;
-            Console.ForegroundColor = defaultForeground;
-            ClearConsole();
-        }
-
-        /// <summary>
-        /// Sets the text screen border as well as additional text in the secondary window
-        /// </summary>
-        public static void StartGame()
-        {
-            for (int i = 0; i < Console.WindowHeight; i++)
-            {
-                Console.SetCursorPosition(Console.WindowWidth - 15, i);
-                Console.Write(" | ");
-            }
-            Console.SetCursorPosition(Console.WindowWidth - 8, 0);
-            Console.Write("Time");
-            Console.SetCursorPosition(Console.WindowWidth - 7, 1);
-            Console.Write(60);
-            Console.SetCursorPosition(0, 0);
-        }
-
-        public static void ClearConsole()
+        public static void Clear()
         {
             Console.Clear();
         }
@@ -55,13 +22,46 @@
         }
 
         /// <summary>
+        /// Sets the window title, icon, and background and foreground colors
+        /// </summary>
+        public static void Initialize()
+        {
+            Console.Title = "Typing Speed Test";
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                System.Drawing.Icon icon = new System.Drawing.Icon("icon.ico");
+                SetWindowIcon(icon);
+            }
+            Console.BackgroundColor = defaultBackground;
+            Console.ForegroundColor = defaultForeground;
+            Clear();
+        }
+
+        /// <summary>
+        /// Sets the text screen border as well as additional text in the secondary window
+        /// </summary>
+        public static void SetupGameScreen()
+        {
+            for (int i = 0; i < Console.WindowHeight; i++)
+            {
+                Console.SetCursorPosition(Console.WindowWidth - 15, i);
+                Console.Write(" | ");
+            }
+            Console.SetCursorPosition(Console.WindowWidth - 8, 0);
+            Console.Write("Time");
+            Console.SetCursorPosition(Console.WindowWidth - 7, 1);
+            Console.Write(60);
+            Console.SetCursorPosition(0, 0);
+        }
+
+        /// <summary>
         /// Displays the initial countdown before the game starts
         /// </summary>
         public async static Task DisplayCountdown()
         {
             await InputOutput.WritePretty("Get Ready!");
             await Task.Delay(2000);
-            ClearConsole();
+            Clear();
             HideCursor();
             int countDown = 3;
             for (int i = countDown; i > 0; i--)
@@ -71,7 +71,7 @@
                 Console.Beep();
                 await Task.Delay(1000);
             }
-            ClearConsole();
+            Clear();
             ShowCursor();
         }
 
@@ -165,19 +165,19 @@
         /// <param name="netWPM"></param>
         /// <param name="mistakes"></param>
         /// <returns></returns>
-        public static async Task DisplayResults(int grossWPM, int netWPM, int mistakes)
+        public static async Task DisplayResults(Result result)
         {
             Console.ForegroundColor = defaultForeground;
             Console.BackgroundColor = defaultBackground;
-            ClearConsole();
+            Clear();
             await InputOutput.WritePretty("Well Done!");
             await Task.Delay(1000);
             await InputOutput.WritePretty("\nHere are your stats\n" +
-                                          "Gross WPM: " + grossWPM + "\n" +
-                                          "Mistakes: " + mistakes, null, Console.CursorTop + 1);
-            if (netWPM >= 0)
+                                          "Gross WPM: " + (int)result.GrossWPM + "\n" +
+                                          "Mistakes: " + result.Mistakes.Count, null, Console.CursorTop + 1);
+            if (result.NetWPM >= 0)
             {
-                await InputOutput.WritePretty("Net WPM: " + netWPM, null, Console.CursorTop + 1);
+                await InputOutput.WritePretty("Net WPM: " + (int)result.NetWPM, null, Console.CursorTop + 1);
             }
             else
             {

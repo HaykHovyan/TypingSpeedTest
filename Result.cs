@@ -3,8 +3,8 @@
     public class Result
     {
         public int CharactersTyped { get; set; }
-        public int GrossWPM { get; set; }
-        public int NetWPM { get; set; }
+        public float GrossWPM { get; set; }
+        public float NetWPM { get; set; }
         public List<char> Mistakes { get; set; }
 
         public Result()
