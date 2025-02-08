@@ -37,6 +37,16 @@
             Clear();
         }
 
+        public static async Task PromptStart()
+        {
+            await InputOutput.WritePretty("Press Space to begin...");
+            while (!Console.KeyAvailable || Console.ReadKey(true).Key != ConsoleKey.Spacebar)
+            {
+                await Task.Delay(10);
+            }
+            Clear();
+        }
+
         /// <summary>
         /// Sets the text screen border as well as additional text in the secondary window
         /// </summary>
@@ -193,18 +203,12 @@
         public static async Task<bool> PromptRestart()
         {
             await InputOutput.WritePretty("\n\n\nPress Space to go again...", null, Console.CursorTop + 1);
-            while (!Console.KeyAvailable)
+
+            while (!Console.KeyAvailable || Console.ReadKey(true).Key != ConsoleKey.Spacebar)
             {
                 await Task.Delay(10);
             }
-            if (Console.ReadKey(true).Key == ConsoleKey.Spacebar)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return true;
         }
 
         public enum WinMessages : uint

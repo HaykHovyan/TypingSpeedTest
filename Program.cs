@@ -8,11 +8,15 @@
         public static async Task Main()
         {
             GUI.Initialize();
+            await GUI.PromptStart();
+
             Game game = new Game();
             await game.Start();
-            while (true)
+
+            bool gameFinished = false;
+            while (!gameFinished)
             {
-                await game.Update();
+                gameFinished = await game.Update();
             }
         }
     }

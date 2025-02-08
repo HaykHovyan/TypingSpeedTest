@@ -38,7 +38,12 @@
             await GUI.DisplayCountdown();
             GUI.SetupGameScreen();
             GenerateText(text);
-            
+
+            //read and discard unwanted input before the game starts
+            while (Console.KeyAvailable)
+            {
+                Console.ReadKey(true);
+            }
             timer.Start();
             timeRemaining.Start();
         }
@@ -49,40 +54,21 @@
         /// <returns>
         /// A boolean indicating whether the game is finished
         /// </returns>
-        public async Task Update()
+        public async Task<bool> Update()
         {
             if (timer.Enabled == false)
             {
-                return;
+                return true;
             }
             else if (currentIndex == text.Length - 1)
             {
                 await End();
-                return;
+                return true;
             }
 
             char inputChar = InputOutput.Read();
             CheckInput(inputChar, text[currentIndex]);
-        }
-
-        /// <summary>
-        /// Called either when the game timer counts down to 0 or when the end of the text is reached
-        /// </summary>
-        private async Task End()
-        {
-            timer.Stop();
-            timeRemaining.Stop();
-            await CalculateWPM();
-            await GUI.DisplayResults(result);
-            bool restart = await GUI.PromptRestart();
-            if (restart)
-            {
-                Program.Main();
-            }
-            else
-            {
-                Environment.Exit(0);
-            }
+            return false;
         }
 
         /// <summary>
@@ -178,6 +164,29 @@
             result.GrossWPM = (result.CharactersTyped / wordLength) / durationMinutes;
             result.NetWPM = result.GrossWPM - (result.Mistakes.Count() / durationMinutes);
             return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Called either when the game timer counts down to 0 or when the end of the text is reached
+        /// </summary>
+        private async Task End()
+        {
+            timer.Stop();
+            timeRemaining.Stop();
+            await CalculateWPM();
+            await GUI.DisplayResults(result);
+
+            //same logic as in the Start method, discard unwanted input until it's time to read actual input
+            while (Console.KeyAvailable)
+            {
+                Console.ReadKey(true);
+            }
+
+            bool restart = await GUI.PromptRestart();
+            if (restart)
+            {
+                await Program.Main();
+            }
         }
     }
 }
