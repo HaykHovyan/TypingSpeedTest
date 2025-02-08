@@ -29,7 +29,7 @@
             Console.Title = "Typing Speed Test";
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
-                System.Drawing.Icon icon = new System.Drawing.Icon("icon.ico");
+                System.Drawing.Icon icon = new System.Drawing.Icon("window.ico");
                 SetWindowIcon(icon);
             }
             Console.BackgroundColor = defaultBackground;
