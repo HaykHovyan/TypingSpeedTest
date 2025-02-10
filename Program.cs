@@ -12,11 +12,9 @@
 
             Game game = new Game();
             await game.Start();
-
-            bool gameFinished = false;
-            while (!gameFinished)
+            while (true)
             {
-                gameFinished = await game.Update();
+                await game.Update();
             }
         }
     }

@@ -44,7 +44,6 @@
             {
                 await Task.Delay(10);
             }
-            Clear();
         }
 
         /// <summary>
@@ -69,6 +68,7 @@
         /// </summary>
         public async static Task DisplayCountdown()
         {
+            Clear();
             await InputOutput.WritePretty("Get Ready!");
             await Task.Delay(2000);
             Clear();

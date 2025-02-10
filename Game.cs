@@ -11,10 +11,12 @@
         private Result result;
 
         /// <summary>
-        /// Standard ctor for variable initialization
+        /// Called once at the start of the game
         /// </summary>
-        public Game()
+        public async Task Start()
         {
+            #region variable initialization
+
             duration = 60_000;
             durationSeconds = duration / 1000;
             text = Texts.GetText();
@@ -28,13 +30,9 @@
                 await GUI.DisplayRemainingTime(durationSeconds);
             };
             result = new Result();
-        }
 
-        /// <summary>
-        /// Called once at the start of the game
-        /// </summary>
-        public async Task Start()
-        {
+            #endregion
+
             await GUI.DisplayCountdown();
             GUI.SetupGameScreen();
             GenerateText(text);
@@ -54,21 +52,20 @@
         /// <returns>
         /// A boolean indicating whether the game is finished
         /// </returns>
-        public async Task<bool> Update()
+        public async Task Update()
         {
             if (timer.Enabled == false)
             {
-                return true;
+                return;
             }
             else if (currentIndex == text.Length - 1)
             {
                 await End();
-                return true;
+                return;
             }
 
             char inputChar = InputOutput.Read();
             CheckInput(inputChar, text[currentIndex]);
-            return false;
         }
 
         /// <summary>
@@ -185,7 +182,7 @@
             bool restart = await GUI.PromptRestart();
             if (restart)
             {
-                await Program.Main();
+                await Start();
             }
         }
     }
